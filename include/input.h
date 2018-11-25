@@ -10,7 +10,6 @@
 /* parameters for input plugin */
 typedef struct _input_parameter input_parameter;
 struct _input_parameter {
-    int id;
     struct _globals *global;
 };
 

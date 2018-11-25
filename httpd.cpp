@@ -30,8 +30,6 @@
 
 
 static globals *pglobal;
-extern context servers[MAX_OUTPUT_PLUGINS];
-int piggy_fine = 2; // FIXME make it command line parameter
 
 /******************************************************************************
 Description.: initializes the iobuffer structure properly
@@ -337,11 +335,11 @@ void send_stream(cfd *context_fd, int input_number)
     while(!pglobal->stop) {
 
         /* wait for fresh frames */
-        pthread_mutex_lock(&pglobal->in[input_number].db);
-        pthread_cond_wait(&pglobal->in[input_number].db_update, &pglobal->in[input_number].db);
+        pthread_mutex_lock(&pglobal->in[input_number]->db);
+        pthread_cond_wait(&pglobal->in[input_number]->db_update, &pglobal->in[input_number]->db);
 
         /* read buffer */
-        frame_size = pglobal->in[input_number].size;
+        frame_size = pglobal->in[input_number]->size;
 
         /* check if framebuffer is large enough, increase it if necessary */
         if(frame_size > max_frame_size) {
@@ -350,7 +348,7 @@ void send_stream(cfd *context_fd, int input_number)
             max_frame_size = frame_size + TEN_K;
             if((tmp = (unsigned char*)realloc(frame, max_frame_size)) == NULL) {
                 free(frame);
-                pthread_mutex_unlock(&pglobal->in[input_number].db);
+                pthread_mutex_unlock(&pglobal->in[input_number]->db);
                 send_error(context_fd->fd, 500, "not enough memory");
                 return;
             }
@@ -358,10 +356,10 @@ void send_stream(cfd *context_fd, int input_number)
             frame = tmp;
         }
 
-        memcpy(frame, pglobal->in[input_number].buf, frame_size);
+        memcpy(frame, pglobal->in[input_number]->buf, frame_size);
         DBG("got frame (size: %d kB)\n", frame_size / 1024);
 
-        pthread_mutex_unlock(&pglobal->in[input_number].db);
+        pthread_mutex_unlock(&pglobal->in[input_number]->db);
 
 #ifdef MANAGMENT
         update_client_timestamp(context_fd->client);
@@ -437,11 +435,11 @@ void send_stream_wxp(cfd *context_fd, int input_number)
     while(!pglobal->stop) {
 
         /* wait for fresh frames */
-        pthread_mutex_lock(&pglobal->in[input_number].db);
-        pthread_cond_wait(&pglobal->in[input_number].db_update, &pglobal->in[input_number].db);
+        pthread_mutex_lock(&pglobal->in[input_number]->db);
+        pthread_cond_wait(&pglobal->in[input_number]->db_update, &pglobal->in[input_number]->db);
 
         /* read buffer */
-        frame_size = pglobal->in[input_number].size;
+        frame_size = pglobal->in[input_number]->size;
 
         /* check if framebuffer is large enough, increase it if necessary */
         if(frame_size > max_frame_size) {
@@ -450,7 +448,7 @@ void send_stream_wxp(cfd *context_fd, int input_number)
             max_frame_size = frame_size + TEN_K;
             if((tmp = realloc(frame, max_frame_size)) == NULL) {
                 free(frame);
-                pthread_mutex_unlock(&pglobal->in[input_number].db);
+                pthread_mutex_unlock(&pglobal->in[input_number]->db);
                 send_error(context_fd->fd, 500, "not enough memory");
                 return;
             }
@@ -459,16 +457,16 @@ void send_stream_wxp(cfd *context_fd, int input_number)
         }
 
         /* copy v4l2_buffer timeval to user space */
-        timestamp = pglobal->in[input_number].timestamp;
+        timestamp = pglobal->in[input_number]->timestamp;
 
         #ifdef MANAGMENT
         update_client_timestamp(context_fd->client);
         #endif
 
-        memcpy(frame, pglobal->in[input_number].buf, frame_size);
+        memcpy(frame, pglobal->in[input_number]->buf, frame_size);
         DBG("got frame (size: %d kB)\n", frame_size / 1024);
 
-        pthread_mutex_unlock(&pglobal->in[input_number].db);
+        pthread_mutex_unlock(&pglobal->in[input_number]->db);
 
         memset(buffer, 0, 50*sizeof(char));
         sprintf(buffer, "mjpeg %07d12345", frame_size);
@@ -599,7 +597,7 @@ void *client_thread(void *arg)
         if(cam_no.find_first_not_of( "0123456789" ) == std::string::npos) {
             int cam = std::stoi(cam_no);
 
-            if (cam < pglobal->incnt) {
+            if (cam < pglobal->in.size()) {
                 input_number = cam;
                 req.type = A_STREAM;
             } else {

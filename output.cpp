@@ -23,7 +23,7 @@
 /*
  * keep context for each server
  */
-context servers;
+context server;
 
 /*** plugin interface functions ***/
 /******************************************************************************
@@ -44,10 +44,10 @@ int output_init(output_parameter *param)
     credentials = NULL;
 
 
-    servers.pglobal = param->global;
-    servers.conf.port = port;
-    servers.conf.hostname = hostname;
-    servers.conf.credentials = credentials;
+    server.pglobal = param->global;
+    server.conf.port = port;
+    server.conf.hostname = hostname;
+    server.conf.credentials = credentials;
 
     OPRINT("HTTP TCP port........: %d\n", ntohs(port));
     OPRINT("HTTP Listen Address..: %s\n", hostname);
@@ -66,7 +66,7 @@ Return Value: always 0
 ******************************************************************************/
 int output_stop()
 {
-    pthread_cancel(servers.threadID);
+    pthread_cancel(server.threadID);
 
     return 0;
 }
@@ -79,8 +79,8 @@ Return Value: always 0
 int output_run()
 {
     /* create thread and pass context to thread function */
-    pthread_create(&(servers.threadID), NULL, server_thread, &(servers));
-    pthread_detach(servers.threadID);
+    pthread_create(&(server.threadID), NULL, server_thread, &(server));
+    pthread_detach(server.threadID);
 
     return 0;
 }

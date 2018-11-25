@@ -36,11 +36,17 @@ using namespace std;
 /* globals */
 static globals global;
 
+struct worker_arg {
+    input *in;
+    int capture_device;
+};
+
 void *worker_thread(void *arg)
 {
-    input * in = (input*)arg;
+    worker_arg *worker = (worker_arg*)arg;
+    input * in = worker->in;
     Mat src;
-    VideoCapture capture(in->param.id );
+    VideoCapture capture(worker->capture_device);
     capture.set(CAP_PROP_FPS, 30);
 
     while (!global.stop) {
@@ -56,27 +62,32 @@ void *worker_thread(void *arg)
         in->set_image(&jpeg_buffer[0], jpeg_buffer.size());
         //usleep(100);
     }
+    delete worker;
 
 
     return NULL;
 }
 
-void add_input() {
-    global.in[global.incnt].param.id = global.incnt;
-    global.in[global.incnt].param.global = &global;
-    if(global.in[global.incnt].init() == -1) {
+void add_input(int device) {
+
+    input *inp = new input();
+    inp->param.global = &global;
+    if(inp->init() == -1) {
         LOG("input_init() return value signals to exit\n");
         closelog();
         return;
     }
 
     pthread_t  worker;
-    if(pthread_create(&worker, 0, worker_thread, &global.in[global.incnt]) != 0) {
+    worker_arg *arg = new worker_arg();
+    arg->in = inp;
+    arg->capture_device = device;
+    if(pthread_create(&worker, 0, worker_thread, arg) != 0) {
         fprintf(stderr, "could not start worker thread\n");
         return;
     }
     pthread_detach(worker);
-    global.incnt++;
+    global.in.push_back(inp);
 }
 
 
@@ -87,11 +98,9 @@ Return Value:
 ******************************************************************************/
 int main(int argc, char *argv[])
 {
-    global.incnt = 0;
-
     /* open input plugin */
-    add_input();
-    add_input();
+    add_input(0);
+    add_input(1);
 
     /* open output plugin */
     global.out.param.global = &global;
