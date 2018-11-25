@@ -7,16 +7,15 @@
 #include <syslog.h>
 #include <pthread.h>
 
-/* parameters for input plugin */
-typedef struct _input_parameter input_parameter;
-struct _input_parameter {
-    struct _globals *global;
-};
+#include "image_streamer.h"
+#include "opencv2/opencv.hpp"
+
+struct globals;
 
 /* structure to store variables/functions for input plugin */
 struct input {
 
-    input_parameter param; // this holds the command line arguments
+    globals *pglobal;
 
     /* signal fresh frames */
     pthread_mutex_t db;
@@ -26,7 +25,7 @@ struct input {
     unsigned char *buf;
     int size;
 
-    int init();
-    int set_image(unsigned char *buffer, int buffer_size);
+    int init(globals *global);
+    int set_image(cv::Mat &image);
 };
 #endif //IMAGE_STREAMER_INPUT_H

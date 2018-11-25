@@ -332,7 +332,7 @@ void send_stream(cfd *context_fd, int input_number)
 
     DBG("Headers send, sending stream now\n");
 
-    while(!pglobal->stop) {
+    while(pglobal->is_running()) {
 
         /* wait for fresh frames */
         pthread_mutex_lock(&pglobal->in[input_number]->db);
@@ -794,7 +794,7 @@ void *server_thread(void *arg)
         }
 
         /* create a child for every client that connects */
-        while(!pglobal->stop) {
+        while(pglobal->is_running()) {
             //int *pfd = (int *)malloc(sizeof(int));
             cfd *pcfd = (cfd*)malloc(sizeof(cfd));
 

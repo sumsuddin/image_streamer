@@ -3,8 +3,9 @@
 using namespace std;
 
 
-int input::init()
+int input::init(globals *global)
 {
+    pglobal = global;
     /* this mutex and the conditional variable are used to synchronize access to the global picture buffer */
     if(pthread_mutex_init(&db, NULL) != 0) {
         return -1;
@@ -19,8 +20,14 @@ int input::init()
     return 0;
 }
 
-int input::set_image(unsigned char *buffer, int buffer_size) {
-    if (!param.global->stop) {
+int input::set_image(cv::Mat &image) {
+    if (pglobal->is_running()) {
+
+        vector<uchar> buffer;
+        // take whatever Mat it returns, and write it to jpeg buffer
+        imencode(".jpg", image, buffer);
+
+        // TODO: what to do if imencode returns an error?
         /* copy JPG picture to global buffer */
         pthread_mutex_lock(&db);
 
@@ -28,8 +35,8 @@ int input::set_image(unsigned char *buffer, int buffer_size) {
         // TODO: what to do if imencode returns an error?
 
         // std::vector is guaranteed to be contiguous
-        buf = buffer;
-        size = buffer_size;
+        buf = buffer.data();
+        size = buffer.size();
 
         /* signal fresh_frame */
         pthread_cond_broadcast(&db_update);

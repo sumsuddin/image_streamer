@@ -11,6 +11,10 @@
 #include <linux/videodev2.h>
 #include <pthread.h>
 #include <vector>
+#include <mutex>
+
+#include "httpd.h"
+#include "opencv2/opencv.hpp"
 
 #ifdef DEBUG
 #define DBG(...) fprintf(stderr, " DBG(%s, %s(), %d): ", __FILE__, __FUNCTION__, __LINE__); fprintf(stderr, __VA_ARGS__)
@@ -24,16 +28,37 @@
 #include "output.h"
 
 /* global variables that are accessed by all plugins */
-typedef struct _globals globals;
 
+struct input;
 
-struct _globals {
-    int stop;
+class globals {
+
+public:
+
+    globals();
+
+    bool is_running();
+
+    // creates and returns the new input id
+    int get_new_input();
+
+    void set_image(int input_id, cv::Mat &image);
+
+    void stop();
+
+private:
+    std::mutex input_locker;
+    bool running = false;
 
     /* input plugin */
     std::vector<input*> in;
 
     /* output plugin */
     output out;
+
+    void start();
+
+    friend void send_stream(cfd *context_fd, int input_number);
+    friend void *client_thread(void *arg);
 };
 #endif //IMAGE_STREAMER_IMAGE_STREAMER_H

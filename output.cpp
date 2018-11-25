@@ -35,7 +35,7 @@ Input Value.: All parameters to work with.
               it is used to distinguish between several server instances
 Return Value: 0 if everything is OK, other values signal an error
 ******************************************************************************/
-int output_init(output_parameter *param)
+int output::init(globals *global)
 {
     int  port;
     char *credentials, *hostname = NULL;
@@ -44,7 +44,7 @@ int output_init(output_parameter *param)
     credentials = NULL;
 
 
-    server.pglobal = param->global;
+    server.pglobal = global;
     server.conf.port = port;
     server.conf.hostname = hostname;
     server.conf.credentials = credentials;
@@ -85,9 +85,6 @@ int output_run()
     return 0;
 }
 
-int output::init(output_parameter *param) {
-    return output_init(param);
-}
 int output::stop() {
     return output_stop();
 }

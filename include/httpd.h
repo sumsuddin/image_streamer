@@ -75,6 +75,8 @@ typedef struct {
     char *credentials;
 } config;
 
+struct globals;
+
 /* context of each server thread */
 typedef struct {
     int sd[MAX_SD_LEN];
