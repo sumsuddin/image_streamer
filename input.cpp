@@ -3,10 +3,9 @@
 using namespace std;
 
 
-int input::init(globals *global)
+int input::init()
 {
-    pglobal = global;
-    /* this mutex and the conditional variable are used to synchronize access to the global picture buffer */
+    /* this mutex and the conditional variable are used to synchronize access to the image_streamer picture buffer */
     if(pthread_mutex_init(&db, NULL) != 0) {
         return -1;
     }
@@ -21,27 +20,24 @@ int input::init(globals *global)
 }
 
 int input::set_image(cv::Mat &image) {
-    if (pglobal->is_running()) {
 
-        vector<uchar> buffer;
-        // take whatever Mat it returns, and write it to jpeg buffer
-        imencode(".jpg", image, buffer);
+    vector<uchar> buffer;
+    // take whatever Mat it returns, and write it to jpeg buffer
+    imencode(".jpg", image, buffer);
 
-        // TODO: what to do if imencode returns an error?
-        /* copy JPG picture to global buffer */
-        pthread_mutex_lock(&db);
+    // TODO: what to do if imencode returns an error?
+    /* copy JPG picture to image_streamer buffer */
+    pthread_mutex_lock(&db);
 
 
-        // TODO: what to do if imencode returns an error?
+    // TODO: what to do if imencode returns an error?
 
-        // std::vector is guaranteed to be contiguous
-        buf = buffer.data();
-        size = buffer.size();
+    // std::vector is guaranteed to be contiguous
+    buf = buffer.data();
+    size = buffer.size();
 
-        /* signal fresh_frame */
-        pthread_cond_broadcast(&db_update);
-        pthread_mutex_unlock(&db);
-        return 0;
-    }
-    return -1;
+    /* signal fresh_frame */
+    pthread_cond_broadcast(&db_update);
+    pthread_mutex_unlock(&db);
+    return 0;
 }

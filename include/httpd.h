@@ -75,13 +75,13 @@ typedef struct {
     char *credentials;
 } config;
 
-struct globals;
+struct ImageStreamer;
 
 /* context of each server thread */
 typedef struct {
     int sd[MAX_SD_LEN];
     int sd_len;
-    globals *pglobal;
+    ImageStreamer *image_streamer;
     pthread_t threadID;
 
     config conf;

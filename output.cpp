@@ -35,7 +35,7 @@ Input Value.: All parameters to work with.
               it is used to distinguish between several server instances
 Return Value: 0 if everything is OK, other values signal an error
 ******************************************************************************/
-int output::init(globals *global)
+int output::init(ImageStreamer *image_streamer)
 {
     int  port;
     char *credentials, *hostname = NULL;
@@ -44,7 +44,7 @@ int output::init(globals *global)
     credentials = NULL;
 
 
-    server.pglobal = global;
+    server.image_streamer = image_streamer;
     server.conf.port = port;
     server.conf.hostname = hostname;
     server.conf.credentials = credentials;

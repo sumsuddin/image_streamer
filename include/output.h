@@ -4,11 +4,11 @@
 #define OUTPUT_PLUGIN_PREFIX " o: "
 #define OPRINT(...) { char _bf[1024] = {0}; snprintf(_bf, sizeof(_bf)-1, __VA_ARGS__); fprintf(stderr, "%s", OUTPUT_PLUGIN_PREFIX); fprintf(stderr, "%s", _bf); syslog(LOG_INFO, "%s", _bf); }
 
-struct globals;
+struct ImageStreamer;
 
 /* structure to store variables/functions for output plugin */
 struct output {
-    int init(globals *global);
+    int init(ImageStreamer *image_streamer);
     int stop();
     int run();
 };

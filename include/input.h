@@ -10,22 +10,20 @@
 #include "image_streamer.h"
 #include "opencv2/opencv.hpp"
 
-struct globals;
+struct ImageStreamer;
 
 /* structure to store variables/functions for input plugin */
 struct input {
-
-    globals *pglobal;
 
     /* signal fresh frames */
     pthread_mutex_t db;
     pthread_cond_t  db_update;
 
-    /* global JPG frame, this is more or less the "database" */
+    /* image_streamer JPG frame, this is more or less the "database" */
     unsigned char *buf;
     int size;
 
-    int init(globals *global);
+    int init();
     int set_image(cv::Mat &image);
 };
 #endif //IMAGE_STREAMER_INPUT_H

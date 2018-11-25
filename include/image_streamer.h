@@ -27,15 +27,15 @@
 #include "input.h"
 #include "output.h"
 
-/* global variables that are accessed by all plugins */
-
 struct input;
 
-class globals {
+/* image_streamer variables that are accessed by all plugins */
+
+class ImageStreamer {
 
 public:
 
-    globals();
+    ImageStreamer();
 
     bool is_running();
 

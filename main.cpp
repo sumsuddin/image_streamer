@@ -30,8 +30,8 @@
 using namespace cv;
 using namespace std;
 
-/* globals */
-static globals global;
+/* ImageStreamer */
+static ImageStreamer image_streamer;
 
 struct worker_arg {
     int input_id;
@@ -47,18 +47,18 @@ void *worker_thread(void *arg)
     capture.set(CAP_PROP_FPS, 30);
     delete worker;
 
-    while (global.is_running()) {
+    while (image_streamer.is_running()) {
         if (!capture.read(src))
             break; // TODO
 
-        global.set_image(input_id, src);
+        image_streamer.set_image(input_id, src);
         //usleep(100);
     }
 }
 
 void add_input(int device) {
 
-    int input_id = global.get_new_input();
+    int input_id = image_streamer.get_new_input();
     if (input_id != -1) {
         pthread_t worker;
         worker_arg *arg = new worker_arg();

@@ -1,7 +1,7 @@
 
 #include "include/image_streamer.h"
 
-globals::globals() {
+ImageStreamer::ImageStreamer() {
     start();
     /* open output plugin */
     if(out.init(this)) {
@@ -10,27 +10,27 @@ globals::globals() {
         exit(EXIT_FAILURE);
     }
 
-    DBG("starting %d output plugin(s)\n", global.outcnt);
+    DBG("starting output plugin(s)\n");
     out.run();
 }
 
-void globals::start() {
+void ImageStreamer::start() {
     running = true;
 }
 
-void globals::set_image(int input_id, cv::Mat &image) {
+void ImageStreamer::set_image(int input_id, cv::Mat &image) {
     if (in.size() > input_id) {
         in[input_id]->set_image(image);
     }
 }
 
-bool globals::is_running() {
+bool ImageStreamer::is_running() {
     return running;
 }
 
-int globals::get_new_input() {
+int ImageStreamer::get_new_input() {
     input *inp = new input();
-    if(inp->init(this) == -1) {
+    if(inp->init() == -1) {
         LOG("input_init() return value signals to exit\n");
         closelog();
         return -1;
@@ -42,6 +42,6 @@ int globals::get_new_input() {
     return id;
 }
 
-void globals::stop() {
+void ImageStreamer::stop() {
     running = false;
 }

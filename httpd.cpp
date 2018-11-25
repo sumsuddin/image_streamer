@@ -29,7 +29,7 @@
 #endif
 
 
-static globals *pglobal;
+static ImageStreamer *image_streamer;
 
 /******************************************************************************
 Description.: initializes the iobuffer structure properly
@@ -332,14 +332,14 @@ void send_stream(cfd *context_fd, int input_number)
 
     DBG("Headers send, sending stream now\n");
 
-    while(pglobal->is_running()) {
+    while(image_streamer->is_running()) {
 
         /* wait for fresh frames */
-        pthread_mutex_lock(&pglobal->in[input_number]->db);
-        pthread_cond_wait(&pglobal->in[input_number]->db_update, &pglobal->in[input_number]->db);
+        pthread_mutex_lock(&image_streamer->in[input_number]->db);
+        pthread_cond_wait(&image_streamer->in[input_number]->db_update, &image_streamer->in[input_number]->db);
 
         /* read buffer */
-        frame_size = pglobal->in[input_number]->size;
+        frame_size = image_streamer->in[input_number]->size;
 
         /* check if framebuffer is large enough, increase it if necessary */
         if(frame_size > max_frame_size) {
@@ -348,7 +348,7 @@ void send_stream(cfd *context_fd, int input_number)
             max_frame_size = frame_size + TEN_K;
             if((tmp = (unsigned char*)realloc(frame, max_frame_size)) == NULL) {
                 free(frame);
-                pthread_mutex_unlock(&pglobal->in[input_number]->db);
+                pthread_mutex_unlock(&image_streamer->in[input_number]->db);
                 send_error(context_fd->fd, 500, "not enough memory");
                 return;
             }
@@ -356,10 +356,10 @@ void send_stream(cfd *context_fd, int input_number)
             frame = tmp;
         }
 
-        memcpy(frame, pglobal->in[input_number]->buf, frame_size);
+        memcpy(frame, image_streamer->in[input_number]->buf, frame_size);
         DBG("got frame (size: %d kB)\n", frame_size / 1024);
 
-        pthread_mutex_unlock(&pglobal->in[input_number]->db);
+        pthread_mutex_unlock(&image_streamer->in[input_number]->db);
 
 #ifdef MANAGMENT
         update_client_timestamp(context_fd->client);
@@ -432,14 +432,14 @@ void send_stream_wxp(cfd *context_fd, int input_number)
 
     DBG("Headers send, sending stream now\n");
 
-    while(!pglobal->stop) {
+    while(!image_streamer->stop) {
 
         /* wait for fresh frames */
-        pthread_mutex_lock(&pglobal->in[input_number]->db);
-        pthread_cond_wait(&pglobal->in[input_number]->db_update, &pglobal->in[input_number]->db);
+        pthread_mutex_lock(&image_streamer->in[input_number]->db);
+        pthread_cond_wait(&image_streamer->in[input_number]->db_update, &image_streamer->in[input_number]->db);
 
         /* read buffer */
-        frame_size = pglobal->in[input_number]->size;
+        frame_size = image_streamer->in[input_number]->size;
 
         /* check if framebuffer is large enough, increase it if necessary */
         if(frame_size > max_frame_size) {
@@ -448,7 +448,7 @@ void send_stream_wxp(cfd *context_fd, int input_number)
             max_frame_size = frame_size + TEN_K;
             if((tmp = realloc(frame, max_frame_size)) == NULL) {
                 free(frame);
-                pthread_mutex_unlock(&pglobal->in[input_number]->db);
+                pthread_mutex_unlock(&image_streamer->in[input_number]->db);
                 send_error(context_fd->fd, 500, "not enough memory");
                 return;
             }
@@ -457,16 +457,16 @@ void send_stream_wxp(cfd *context_fd, int input_number)
         }
 
         /* copy v4l2_buffer timeval to user space */
-        timestamp = pglobal->in[input_number]->timestamp;
+        timestamp = image_streamer->in[input_number]->timestamp;
 
         #ifdef MANAGMENT
         update_client_timestamp(context_fd->client);
         #endif
 
-        memcpy(frame, pglobal->in[input_number]->buf, frame_size);
+        memcpy(frame, image_streamer->in[input_number]->buf, frame_size);
         DBG("got frame (size: %d kB)\n", frame_size / 1024);
 
-        pthread_mutex_unlock(&pglobal->in[input_number]->db);
+        pthread_mutex_unlock(&image_streamer->in[input_number]->db);
 
         memset(buffer, 0, 50*sizeof(char));
         sprintf(buffer, "mjpeg %07d12345", frame_size);
@@ -597,7 +597,7 @@ void *client_thread(void *arg)
         if(cam_no.find_first_not_of( "0123456789" ) == std::string::npos) {
             int cam = std::stoi(cam_no);
 
-            if (cam < pglobal->in.size()) {
+            if (cam < image_streamer->in.size()) {
                 input_number = cam;
                 req.type = A_STREAM;
             } else {
@@ -714,7 +714,7 @@ void *server_thread(void *arg)
     int i;
 
     context *pcontext = (context*)arg;
-    pglobal = pcontext->pglobal;
+    image_streamer = pcontext->image_streamer;
 
     /* set cleanup handler to cleanup resources */
     pthread_cleanup_push(server_cleanup, pcontext);
@@ -794,7 +794,7 @@ void *server_thread(void *arg)
         }
 
         /* create a child for every client that connects */
-        while(pglobal->is_running()) {
+        while(image_streamer->is_running()) {
             //int *pfd = (int *)malloc(sizeof(int));
             cfd *pcfd = (cfd*)malloc(sizeof(cfd));
 
