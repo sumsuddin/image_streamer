@@ -27,35 +27,6 @@
 /* global variables that are accessed by all plugins */
 typedef struct _globals globals;
 
-/* an enum to identify the commands destination*/
-typedef enum {
-    Dest_Input = 0,
-    Dest_Output = 1,
-    Dest_Program = 2,
-} command_dest;
-
-/* commands which can be send to the input plugin */
-//typedef enum _cmd_group cmd_group;
-enum _cmd_group {
-    IN_CMD_GENERIC =        0, // if you use non V4L2 input plugin you not need to deal the groups.
-    IN_CMD_V4L2 =           1,
-    IN_CMD_RESOLUTION =     2,
-    IN_CMD_JPEG_QUALITY =   3,
-    IN_CMD_PWC =            4,
-};
-
-typedef struct _control control;
-struct _control {
-    struct v4l2_queryctrl ctrl;
-    int value;
-    struct v4l2_querymenu *menuitems;
-    /*  In the case the control a V4L2 ctrl this variable will specify
-        that the control is a V4L2_CTRL_CLASS_USER control or not.
-        For non V4L2 control it is not acceptable, leave it 0.
-    */
-    int class_id;
-    int group;
-};
 
 struct _globals {
     int stop;
@@ -65,10 +36,6 @@ struct _globals {
     int incnt;
 
     /* output plugin */
-    output out[MAX_OUTPUT_PLUGINS];
-    int outcnt;
-
-    /* pointer to control functions */
-    //int (*control)(int command, char *details);
+    output out;
 };
 #endif //IMAGE_STREAMER_IMAGE_STREAMER_H

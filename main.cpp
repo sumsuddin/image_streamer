@@ -61,6 +61,24 @@ void *worker_thread(void *arg)
     return NULL;
 }
 
+void add_input() {
+    global.in[global.incnt].param.id = global.incnt;
+    global.in[global.incnt].param.global = &global;
+    if(global.in[global.incnt].init() == -1) {
+        LOG("input_init() return value signals to exit\n");
+        closelog();
+        return;
+    }
+
+    pthread_t  worker;
+    if(pthread_create(&worker, 0, worker_thread, &global.in[global.incnt]) != 0) {
+        fprintf(stderr, "could not start worker thread\n");
+        return;
+    }
+    pthread_detach(worker);
+    global.incnt++;
+}
+
 
 /******************************************************************************
 Description.:
@@ -69,49 +87,22 @@ Return Value:
 ******************************************************************************/
 int main(int argc, char *argv[])
 {
-    int daemon = 0, i, j;
-    size_t tmp = 0;
-
-    global.outcnt = 1;
-    global.incnt = 2;
+    global.incnt = 0;
 
     /* open input plugin */
-    for(i = 0; i < global.incnt; i++) {
-        global.in[i].param.id = i;
-        global.in[i].param.global = &global;
-        if(global.in[i].init() == -1) {
-            LOG("input_init() return value signals to exit\n");
-            closelog();
-            exit(0);
-        }
-    }
+    add_input();
+    add_input();
 
     /* open output plugin */
-    for(i = 0; i < global.outcnt; i++) {
-
-        global.out[i].param.global = &global;
-        if(global.out[i].init(&global.out[i].param)) {
-            LOG("output_init() return value signals to exit\n");
-            closelog();
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    /* start to read the input, push pictures into global buffer */
-    DBG("starting %d input plugin\n", global.incnt);
-    for(i = 0; i < global.incnt; i++) {
-        pthread_t  worker;
-        if(pthread_create(&worker, 0, worker_thread, &global.in[i]) != 0) {
-            fprintf(stderr, "could not start worker thread\n");
-            exit(EXIT_FAILURE);
-        }
-        pthread_detach(worker);
+    global.out.param.global = &global;
+    if(global.out.init(&global.out.param)) {
+        LOG("output_init() return value signals to exit\n");
+        closelog();
+        exit(EXIT_FAILURE);
     }
 
     DBG("starting %d output plugin(s)\n", global.outcnt);
-    for(i = 0; i < global.outcnt; i++) {
-        global.out[i].run();
-    }
+    global.out.run();
 
     /* wait for signals */
     pause();
