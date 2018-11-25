@@ -35,12 +35,12 @@ Input Value.: All parameters to work with.
               it is used to distinguish between several server instances
 Return Value: 0 if everything is OK, other values signal an error
 ******************************************************************************/
-int output::init(ImageStreamer *image_streamer)
+int output::init(ImageStreamer *image_streamer, int port_number)
 {
     int  port;
     char *credentials, *hostname = NULL;
 
-    port = htons(8877);
+    port = htons(port_number);
     credentials = NULL;
 
 

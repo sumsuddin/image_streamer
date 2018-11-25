@@ -31,7 +31,7 @@ using namespace cv;
 using namespace std;
 
 /* ImageStreamer */
-static ImageStreamer image_streamer;
+static ImageStreamer image_streamer(8888);
 
 struct worker_arg {
     int input_id;
@@ -80,12 +80,29 @@ Return Value:
 ******************************************************************************/
 int main(int argc, char *argv[])
 {
+
+#if true // simplified
+    int input_id = image_streamer.get_new_input();
+    Mat src;
+    VideoCapture capture(0);
+    capture.set(CAP_PROP_FPS, 30);
+
+    while (image_streamer.is_running()) {
+        if (!capture.read(src))
+            break; // TODO
+
+        image_streamer.set_image(input_id, src);
+    }
+
+#else
+    //threaded
     /* open input plugin */
     add_input(0);
     //add_input(1);
 
     /* wait for signals */
     pause();
-
+#endif
     return 0;
+
 }

@@ -8,7 +8,7 @@ struct ImageStreamer;
 
 /* structure to store variables/functions for output plugin */
 struct output {
-    int init(ImageStreamer *image_streamer);
+    int init(ImageStreamer *image_streamer, int port_number);
     int stop();
     int run();
 };

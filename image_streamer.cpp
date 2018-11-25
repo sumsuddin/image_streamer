@@ -1,10 +1,10 @@
 
 #include "include/image_streamer.h"
 
-ImageStreamer::ImageStreamer() {
+ImageStreamer::ImageStreamer(int port) {
     start();
     /* open output plugin */
-    if(out.init(this)) {
+    if(out.init(this, port)) {
         LOG("output_init() return value signals to exit\n");
         closelog();
         exit(EXIT_FAILURE);

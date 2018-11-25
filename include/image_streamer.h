@@ -35,7 +35,7 @@ class ImageStreamer {
 
 public:
 
-    ImageStreamer();
+    ImageStreamer(int port);
 
     bool is_running();
 
