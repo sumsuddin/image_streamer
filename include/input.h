@@ -27,7 +27,7 @@ struct input {
     unsigned char *buf;
     int size;
 
-    int init(input_parameter *);
-    int set_image(unsigned char *buffer, int buffer_size, int id);
+    int init();
+    int set_image(unsigned char *buffer, int buffer_size);
 };
 #endif //IMAGE_STREAMER_INPUT_H

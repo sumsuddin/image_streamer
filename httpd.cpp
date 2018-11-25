@@ -14,6 +14,7 @@
 #include <netdb.h>
 #include <errno.h>
 #include <limits.h>
+#include <string>
 
 #include <linux/version.h>
 #include <linux/types.h>          /* for videodev2.h */
@@ -578,6 +579,7 @@ void *client_thread(void *arg)
 
     /* What does the client want to receive? Read the request. */
     memset(buffer, 0, sizeof(buffer));
+
     if((cnt = _readline(lcfd.fd, &iobuf, buffer, sizeof(buffer) - 1, 5)) == -1) {
         close(lcfd.fd);
         return NULL;
@@ -588,27 +590,24 @@ void *client_thread(void *arg)
     /* determine what to deliver */
     if(strstr(buffer, "GET /?action=stream") != NULL) {
         req.type = A_STREAM;
-#ifdef MANAGMENT
-        if (check_client_status(lcfd.client)) {
+    } if(strstr(buffer, "GET /?stream=") != NULL) {
+        std::string url(buffer);
+        std::string prefix = "GET /?stream=";
+        std::string cam_no = url.substr(url.find(prefix) + prefix.size());
+        cam_no = cam_no.substr(0, cam_no.find(" HTTP/1.1"));
+
+        if(cam_no.find_first_not_of( "0123456789" ) == std::string::npos) {
+            int cam = std::stoi(cam_no);
+
+            if (cam < pglobal->incnt) {
+                input_number = cam;
+                req.type = A_STREAM;
+            } else {
+                req.type = A_UNKNOWN;
+            }
+        } else {
             req.type = A_UNKNOWN;
-            lcfd.client->last_take_time.tv_sec += piggy_fine;
-            send_error(lcfd.fd, 403, "frame already sent");
-            query_suffixed = 0;
         }
-#endif
-#ifdef WXP_COMPAT
-        } else if((strstr(buffer, "GET /cam") != NULL) && (strstr(buffer, ".mjpg") != NULL)) {
-        req.type = A_STREAM_WXP;
-        query_suffixed = 255;
-        #ifdef MANAGMENT
-        if (check_client_status(lcfd.client)) {
-            req.type = A_UNKNOWN;
-            lcfd.client->last_take_time.tv_sec += piggy_fine;
-            send_error(lcfd.fd, 403, "frame already sent");
-            query_suffixed = 0;
-        }
-        #endif
-#endif
     } else {
         req.type = A_UNKNOWN;
     }

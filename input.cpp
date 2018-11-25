@@ -2,24 +2,26 @@
 #include "include/image_streamer.h"
 using namespace std;
 
-/* private functions and variables to this plugin */
-static globals     *pglobal;
 
-
-int input::init(input_parameter *param)
+int input::init()
 {
-    pglobal = param->global;
-    input * in = &pglobal->in[param->id];
+    /* this mutex and the conditional variable are used to synchronize access to the global picture buffer */
+    if(pthread_mutex_init(&param.global->in[param.id].db, NULL) != 0) {
+        return -1;
+    }
+    if(pthread_cond_init(&param.global->in[param.id].db_update, NULL) != 0) {
+        return -1;
+    }
 
-    in->buf = NULL;
-    in->size = 0;
+    param.global->in[param.id].buf       = NULL;
+    param.global->in[param.id].size      = 0;
 
     return 0;
 }
 
-int input::set_image(unsigned char *buffer, int buffer_size, int id) {
-    if (!pglobal->stop) {
-        input * in = &pglobal->in[id];
+int input::set_image(unsigned char *buffer, int buffer_size) {
+    if (!param.global->stop) {
+        input * in = &param.global->in[param.id];
 
         /* copy JPG picture to global buffer */
         pthread_mutex_lock(&in->db);

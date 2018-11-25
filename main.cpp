@@ -40,7 +40,7 @@ void *worker_thread(void *arg)
 {
     input * in = (input*)arg;
     Mat src;
-    VideoCapture capture(0);
+    VideoCapture capture(in->param.id );
     capture.set(CAP_PROP_FPS, 30);
 
     while (!global.stop) {
@@ -53,7 +53,7 @@ void *worker_thread(void *arg)
 
         // TODO: what to do if imencode returns an error?
 
-        in->set_image(&jpeg_buffer[0], jpeg_buffer.size(), 0);
+        in->set_image(&jpeg_buffer[0], jpeg_buffer.size());
         //usleep(100);
     }
 
@@ -73,29 +73,13 @@ int main(int argc, char *argv[])
     size_t tmp = 0;
 
     global.outcnt = 1;
-    global.incnt = 1;
+    global.incnt = 2;
 
     /* open input plugin */
     for(i = 0; i < global.incnt; i++) {
-        /* this mutex and the conditional variable are used to synchronize access to the global picture buffer */
-        if(pthread_mutex_init(&global.in[i].db, NULL) != 0) {
-            LOG("could not initialize mutex variable\n");
-            closelog();
-            exit(EXIT_FAILURE);
-        }
-        if(pthread_cond_init(&global.in[i].db_update, NULL) != 0) {
-            LOG("could not initialize condition variable\n");
-            closelog();
-            exit(EXIT_FAILURE);
-        }
-
-        global.in[i].buf       = NULL;
-        global.in[i].size      = 0;
-
-        global.in[i].param.global = &global;
         global.in[i].param.id = i;
-
-        if(global.in[i].init(&global.in[i].param)) {
+        global.in[i].param.global = &global;
+        if(global.in[i].init() == -1) {
             LOG("input_init() return value signals to exit\n");
             closelog();
             exit(0);
