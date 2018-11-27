@@ -5,7 +5,7 @@
 #ifndef IMAGE_STREAMER_HTTPD_H
 #define IMAGE_STREAMER_HTTPD_H
 
-#include "utils.h"
+#include <utils.h>
 
 #define IO_BUFFER 256
 #define BUFFER_SIZE 1024

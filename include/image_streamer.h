@@ -7,14 +7,28 @@
 /* FIXME take a look to the output_http clients thread marked with fixme if you want to set more then 10 plugins */
 #define MAX_INPUT_PLUGINS 10
 
+
+#include <unistd.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <errno.h>
+#include <signal.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <getopt.h>
+#include <pthread.h>
+#include <dlfcn.h>
+#include <fcntl.h>
+#include <syslog.h>
 #include <linux/types.h>          /* for videodev2.h */
 #include <linux/videodev2.h>
-#include <pthread.h>
-#include <vector>
+
 #include <mutex>
 
-#include "httpd.h"
-#include "opencv2/opencv.hpp"
+#include <httpd.h>
+#include <opencv2/opencv.hpp>
 
 #ifdef DEBUG
 #define DBG(...) fprintf(stderr, " DBG(%s, %s(), %d): ", __FILE__, __FUNCTION__, __LINE__); fprintf(stderr, __VA_ARGS__)
@@ -40,7 +54,9 @@ public:
     bool is_running();
 
     // creates and returns the new input id
-    int get_new_input();
+    int create_new_input();
+
+    int get_num_inputs();
 
     void set_image(int input_id, cv::Mat &image);
 

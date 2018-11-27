@@ -24,14 +24,14 @@
 #include <dlfcn.h>
 #include <pthread.h>
 
-#include "include/utils.h"
-#include "include/image_streamer.h"
+#include <utils.h>
+#include <image_streamer.h>
 
 using namespace cv;
 using namespace std;
 
 /* ImageStreamer */
-static ImageStreamer image_streamer(8888);
+static ImageStreamer image_streamer(8877);
 
 struct worker_arg {
     int input_id;
@@ -58,7 +58,7 @@ void *worker_thread(void *arg)
 
 void add_input(int device) {
 
-    int input_id = image_streamer.get_new_input();
+    int input_id = image_streamer.create_new_input();
     if (input_id != -1) {
         pthread_t worker;
         worker_arg *arg = new worker_arg();
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 {
 
 #if true // simplified
-    int input_id = image_streamer.get_new_input();
+    int input_id = image_streamer.create_new_input();
     Mat src;
     VideoCapture capture(0);
     capture.set(CAP_PROP_FPS, 30);

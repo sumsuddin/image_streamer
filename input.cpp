@@ -1,5 +1,5 @@
-#include "include/input.h"
-#include "include/image_streamer.h"
+#include <input.h>
+#include <image_streamer.h>
 using namespace std;
 
 

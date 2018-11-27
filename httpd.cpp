@@ -20,9 +20,9 @@
 #include <linux/types.h>          /* for videodev2.h */
 #include <linux/videodev2.h>
 
-#include "include/image_streamer.h"
+#include <image_streamer.h>
 
-#include "include/httpd.h"
+#include <httpd.h>
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,32)
 #define V4L2_CTRL_TYPE_STRING_SUPPORTED

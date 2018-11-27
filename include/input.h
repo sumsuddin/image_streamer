@@ -7,8 +7,8 @@
 #include <syslog.h>
 #include <pthread.h>
 
-#include "image_streamer.h"
-#include "opencv2/opencv.hpp"
+#include <image_streamer.h>
+#include <opencv2/opencv.hpp>
 
 struct ImageStreamer;
 

@@ -16,8 +16,8 @@
 #include <linux/types.h>          /* for videodev2.h */
 #include <linux/videodev2.h>
 
-#include "include/image_streamer.h"
-#include "include/httpd.h"
+#include <image_streamer.h>
+#include <httpd.h>
 
 #define LOG(...) { char _bf[1024] = {0}; snprintf(_bf, sizeof(_bf)-1, __VA_ARGS__); fprintf(stderr, "%s", _bf); syslog(LOG_INFO, "%s", _bf); }
 /*
