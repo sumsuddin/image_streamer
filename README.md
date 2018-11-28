@@ -1,5 +1,12 @@
 # image_streamer
 
+**Build**
+
+    $ mkdir build && cd build
+    $ cmake ..
+    $ ./demo
+
+**Code Sample**
 
     /* ImageStreamer */
     static ImageStreamer image_streamer(8877);
