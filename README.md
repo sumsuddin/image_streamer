@@ -9,7 +9,7 @@
 **Code Sample**
 
     /* ImageStreamer */
-    static ImageStreamer image_streamer(8877);
+    static ImageStreamer image_streamer(8888);
 
     int main() {
 
