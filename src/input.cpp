@@ -1,7 +1,5 @@
 #include <input.h>
-#include <image_streamer.h>
 using namespace std;
-
 
 int input::init()
 {
@@ -20,16 +18,9 @@ int input::init()
 }
 
 int input::set_image(cv::Mat &image) {
-
-    vector<uchar> buffer;
+    pthread_mutex_lock(&db);
     // take whatever Mat it returns, and write it to jpeg buffer
     imencode(".jpg", image, buffer);
-
-    // TODO: what to do if imencode returns an error?
-    /* copy JPG picture to image_streamer buffer */
-    pthread_mutex_lock(&db);
-
-
     // TODO: what to do if imencode returns an error?
 
     // std::vector is guaranteed to be contiguous

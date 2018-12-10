@@ -25,5 +25,6 @@ struct input {
 
     int init();
     int set_image(cv::Mat &image);
+    std::vector<uchar> buffer;
 };
 #endif //IMAGE_STREAMER_INPUT_H

@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 #if true // simplified
     int input_id = image_streamer.create_new_input();
     Mat src;
-    VideoCapture capture(0);
+    VideoCapture capture("rtsp://service:12Tigerit%2B%2B@192.168.105.5");
     capture.set(CAP_PROP_FPS, 30);
 
     while (image_streamer.is_running()) {
@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
             break; // TODO
 
         image_streamer.set_image(input_id, src);
+        //usleep(100);
     }
 
 #else
