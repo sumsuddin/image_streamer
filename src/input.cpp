@@ -11,9 +11,6 @@ int input::init()
         return -1;
     }
 
-    buf       = NULL;
-    size      = 0;
-
     return 0;
 }
 
@@ -22,10 +19,6 @@ int input::set_image(cv::Mat &image) {
     // take whatever Mat it returns, and write it to jpeg buffer
     imencode(".jpg", image, buffer);
     // TODO: what to do if imencode returns an error?
-
-    // std::vector is guaranteed to be contiguous
-    buf = buffer.data();
-    size = buffer.size();
 
     /* signal fresh_frame */
     pthread_cond_broadcast(&db_update);

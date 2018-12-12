@@ -339,7 +339,7 @@ void send_stream(cfd *context_fd, int input_number)
         pthread_cond_wait(&image_streamer->in[input_number]->db_update, &image_streamer->in[input_number]->db);
 
         /* read buffer */
-        frame_size = image_streamer->in[input_number]->size;
+        frame_size = image_streamer->in[input_number]->buffer.size();
 
         /* check if framebuffer is large enough, increase it if necessary */
         if(frame_size > max_frame_size) {
@@ -356,7 +356,7 @@ void send_stream(cfd *context_fd, int input_number)
             frame = tmp;
         }
 
-        memcpy(frame, image_streamer->in[input_number]->buf, frame_size);
+        memcpy(frame, image_streamer->in[input_number]->buffer.data(), image_streamer->in[input_number]->buffer.size());
         DBG("got frame (size: %d kB)\n", frame_size / 1024);
 
         pthread_mutex_unlock(&image_streamer->in[input_number]->db);
@@ -463,7 +463,7 @@ void send_stream_wxp(cfd *context_fd, int input_number)
         update_client_timestamp(context_fd->client);
         #endif
 
-        memcpy(frame, image_streamer->in[input_number]->buf, frame_size);
+        memcpy(frame, image_streamer->in[input_number]->buffer.data(), image_streamer->in[input_number]->buffer.size());
         DBG("got frame (size: %d kB)\n", frame_size / 1024);
 
         pthread_mutex_unlock(&image_streamer->in[input_number]->db);

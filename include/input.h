@@ -19,10 +19,6 @@ struct input {
     pthread_mutex_t db;
     pthread_cond_t  db_update;
 
-    /* image_streamer JPG frame, this is more or less the "database" */
-    unsigned char *buf;
-    int size;
-
     int init();
     int set_image(cv::Mat &image);
     std::vector<uchar> buffer;
